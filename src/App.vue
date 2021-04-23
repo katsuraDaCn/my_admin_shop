@@ -1,6 +1,7 @@
 <template>
   <div id="app">
     <img src="./assets/logo.png">
+    <!-- zzz -->
     <div>
       <p>
         If Element is successfully added to this project, you'll see an
