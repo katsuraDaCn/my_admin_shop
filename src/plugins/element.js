@@ -3,9 +3,11 @@ import {
   Button,
   Form,
   FormItem,
-  Input
+  Input,
+  Message
 } from 'element-ui'
 
+Vue.prototype.$message = Message
 Vue.use(Button)
 Vue.use(Form)
 Vue.use(FormItem)
