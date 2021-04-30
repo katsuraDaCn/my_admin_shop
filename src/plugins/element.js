@@ -8,7 +8,10 @@ import {
   Container,
   Aside,
   Header,
-  Main
+  Main,
+  Menu,
+  Submenu,
+  MenuItem
 } from 'element-ui'
 
 Vue.prototype.$message = Message
@@ -20,3 +23,6 @@ Vue.use(Container)
 Vue.use(Aside)
 Vue.use(Header)
 Vue.use(Main)
+Vue.use(Menu)
+Vue.use(Submenu)
+Vue.use(MenuItem)
