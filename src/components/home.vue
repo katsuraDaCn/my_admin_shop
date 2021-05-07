@@ -10,17 +10,29 @@
     <el-container>
       <!-- 侧边栏区域 -->
       <el-aside width="200px">
-        <el-menu background-color="#333744" text-color="#fff" active-text-color="#ffd04b">
-          <el-submenu index="1">
+        <el-menu
+          background-color="#333744"
+          text-color="#fff"
+          active-text-color="#369bff"
+        >
+          <el-submenu
+            :index="item.id + ''"
+            v-for="item in menuList"
+            :key="item.id"
+          >
             <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>导航一</span>
+              <i :class="iconsObj[item.id]"></i>
+              <span>{{ item.authName }}</span>
             </template>
-            <el-menu-item index="1-2">
+            <el-menu-item
+              :index="subItem.id + ''"
+              v-for="subItem in item.children"
+              :key="subItem.id"
+            >
               <template slot="title">
-              <i class="el-icon-location"></i>
-              <span>选项1</span>
-            </template>
+                <i class="el-icon-menu"></i>
+                <span>{{ subItem.authName }}</span>
+              </template>
             </el-menu-item>
           </el-submenu>
         </el-menu>
@@ -32,9 +44,30 @@
 
 <script>
 export default {
+  data() {
+    return {
+      menuList: [],
+      iconsObj: {
+        '125': 'iconfont icon-user',
+        '103': 'iconfont icon-tijikongjian',
+        '101': 'iconfont icon-shangpin',
+        '102': 'iconfont icon-danju',
+        '145': 'iconfont icon-baobiao'
+      }
+    }
+  },
+  created() {
+    this.getMenuList()
+  },
   methods: {
+    async getMenuList() {
+      const { data: res } = await this.$http.get('menus')
+      if (res.meta.status !== 200) return this.$message.error(res.meta.msg)
+      this.menuList = res.data
+      console.log(this.menuList)
+    },
     logout() {
-      window.sessionStorage.clear('token')
+      window.sessionStorage.clear()
       this.$router.push('/login')
     }
   }
@@ -52,6 +85,9 @@ export default {
 
 .el-aside {
   background-color: #333744;
+  >.el-menu {
+    border-right: none;
+  }
 }
 
 .el-main {
@@ -65,12 +101,16 @@ export default {
   padding-left: 10px !important;
   color: #fff;
   font-size: 20px;
-  >div {
+  > div {
     display: flex;
     align-items: center;
-    >span {
+    > span {
       margin-left: 15px;
     }
   }
+}
+
+.iconfont {
+  margin-right: 10px;
 }
 </style>
