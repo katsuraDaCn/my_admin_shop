@@ -9,11 +9,15 @@
     >
     <el-container>
       <!-- 侧边栏区域 -->
-      <el-aside width="200px">
+      <el-aside :width="isCollapse ? '64px' : '200px'">
+        <div class="toggle-button" @click="toggleCollapase">|||</div>
         <el-menu
           background-color="#333744"
           text-color="#fff"
           active-text-color="#369bff"
+          :collapse="isCollapse"
+          :collapse-transition ="false"
+          router
         >
           <el-submenu
             :index="item.id + ''"
@@ -25,7 +29,7 @@
               <span>{{ item.authName }}</span>
             </template>
             <el-menu-item
-              :index="subItem.id + ''"
+              :index=" '/' + subItem.path"
               v-for="subItem in item.children"
               :key="subItem.id"
             >
@@ -37,7 +41,10 @@
           </el-submenu>
         </el-menu>
       </el-aside>
-      <el-main>Main</el-main>
+      <el-main>
+        <!-- 路由占位符  -->
+        <router-view></router-view>
+      </el-main>
     </el-container>
   </el-container>
 </template>
@@ -53,7 +60,8 @@ export default {
         '101': 'iconfont icon-shangpin',
         '102': 'iconfont icon-danju',
         '145': 'iconfont icon-baobiao'
-      }
+      },
+      isCollapse: false,
     }
   },
   created() {
@@ -69,6 +77,11 @@ export default {
     logout() {
       window.sessionStorage.clear()
       this.$router.push('/login')
+    },
+    toggleCollapase() {
+      // 秀
+      // this.isCollapse = this.isCollapse === false ? true : false
+      this.isCollapse = !this.isCollapse
     }
   }
 }
@@ -87,6 +100,15 @@ export default {
   background-color: #333744;
   >.el-menu {
     border-right: none;
+  }
+  >.toggle-button {
+    background-color: #485164;
+    font-size: 10px;
+    line-height: 24px;
+    color: #fff;
+    text-align: center;
+    letter-spacing: 0.2rem;
+    cursor: pointer;
   }
 }
 
