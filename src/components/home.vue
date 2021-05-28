@@ -12,6 +12,7 @@
       <el-aside :width="isCollapse ? '64px' : '200px'">
         <div class="toggle-button" @click="toggleCollapase">|||</div>
         <el-menu
+          :default-active="$route.path"
           background-color="#333744"
           text-color="#fff"
           active-text-color="#369bff"
