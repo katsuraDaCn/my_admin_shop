@@ -18,7 +18,10 @@ import {
   Row,
   Col,
   Table,
-  TableColumn
+  TableColumn,
+  Switch,
+  Tooltip,
+  Pagination
 } from 'element-ui'
 
 Vue.prototype.$message = Message
@@ -40,3 +43,6 @@ Vue.use(Row)
 Vue.use(Col)
 Vue.use(Table)
 Vue.use(TableColumn)
+Vue.use(Switch)
+Vue.use(Tooltip)
+Vue.use(Pagination)
