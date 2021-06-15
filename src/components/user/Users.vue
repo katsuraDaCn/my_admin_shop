@@ -11,12 +11,23 @@
       <!-- 搜索添加区域 -->
       <el-row :gutter="20">
         <el-col :span="8">
-          <el-input placeholder="请输入内容">
-            <el-button slot="append" icon="el-icon-search"></el-button>
+          <el-input
+            placeholder="请输入内容"
+            v-model="queryInfo.query"
+            clearable
+            @clear="getUserList"
+          >
+            <el-button
+              slot="append"
+              icon="el-icon-search"
+              @click="getUserList"
+            ></el-button>
           </el-input>
         </el-col>
         <el-col :span="8">
-          <el-button type="primary">添加用户</el-button>
+          <el-button type="primary" @click="addDialogVisible = true"
+            >添加用户</el-button
+          >
         </el-col>
       </el-row>
       <!-- 用户列表区域 -->
@@ -30,7 +41,10 @@
         <el-table-column prop="role_name" label="角色"> </el-table-column>
         <el-table-column prop="address" label="状态">
           <template slot-scope="scope">
-            <el-switch v-model="scope.row.mg_state"></el-switch>
+            <el-switch
+              v-model="scope.row.mg_state"
+              @change="userStateChange(scope.row)"
+            ></el-switch>
           </template>
         </el-table-column>
         <el-table-column prop="address" label="操作" width="180px">
@@ -72,6 +86,34 @@
       >
       </el-pagination>
     </el-card>
+    <!-- 对话框 -->
+    <el-dialog
+      title="添加用户"
+      :visible.sync="addDialogVisible"
+      width="50%"
+      :before-close="handleClose"
+    >
+      <el-form ref="addFormRef" :model="addForm" :rules="addFormRules" label-width="80px">
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" prop="mobile">
+          <el-input v-model="addForm.mobile"></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="addDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addDialogVisible = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -86,7 +128,32 @@ export default {
         pagesize: 2
       },
       total: 0,
-      userList: []
+      userList: [],
+      addDialogVisible: false,
+      addForm: {
+        username:'',
+        password:'',
+        email:'',
+        mobile:''
+      },
+      addFormRules: {
+        username:[
+          {required:true,message:'请输入用户名',trigger:'blur'},
+          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        ],
+        password:[
+          {required:true,message:'请输入密码',trigger:'blur'},
+          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        ],
+        email:[
+          {required:true,message:'请输入邮箱',trigger:'blur'},
+          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        ],
+        mobile:[
+          {required:true,message:'请输入手机号',trigger:'blur'},
+          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        ],
+      }
     }
   },
   created() {
@@ -112,13 +179,24 @@ export default {
     handleCurrentChange(newPagenum) {
       this.queryInfo.pagenum = newPagenum
       this.getUserList()
+    },
+    async userStateChange(userInfo) {
+      console.log(userInfo)
+      const { data: res } = await this.$http.put(
+        `users/${userInfo.id}/state/${userInfo.mg_state}`
+      )
+      if (res.meta.status !== 200) {
+        userInfo.mg_state = !userInfo.mg_state
+        return this.$message.error('用户状态更新失败！')
+      }
+      return this.$message.success('用户状态更新成功！')
     }
   }
 }
 </script>
 
 <style lang="less" scoped>
-  .el-pagination  {
-    margin-top: 20px;
-  }
+.el-pagination {
+  margin-top: 20px;
+}
 </style>
