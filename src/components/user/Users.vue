@@ -47,12 +47,13 @@
             ></el-switch>
           </template>
         </el-table-column>
-        <el-table-column prop="address" label="操作" width="180px">
+        <el-table-column  label="操作" width="180px">
           <template>
             <el-button
               type="primary"
               icon="el-icon-edit"
               size="mini"
+              @click="showEditDialog"
             ></el-button>
             <el-button
               type="danger"
@@ -91,9 +92,14 @@
       title="添加用户"
       :visible.sync="addDialogVisible"
       width="50%"
-      :before-close="handleClose"
+      @close="addDialogClosed"
     >
-      <el-form ref="addFormRef" :model="addForm" :rules="addFormRules" label-width="80px">
+      <el-form
+        ref="addUserFormRef"
+        :model="addForm"
+        :rules="addFormRules"
+        label-width="80px"
+      >
         <el-form-item label="用户名" prop="username">
           <el-input v-model="addForm.username"></el-input>
         </el-form-item>
@@ -109,9 +115,37 @@
       </el-form>
       <span slot="footer" class="dialog-footer">
         <el-button @click="addDialogVisible = false">取 消</el-button>
-        <el-button type="primary" @click="addDialogVisible = false"
-          >确 定</el-button
-        >
+        <el-button type="primary" @click="addUser">确 定</el-button>
+      </span>
+    </el-dialog>
+    <el-dialog
+      title="添加用户"
+      :visible.sync="editDialogVisible"
+      width="50%"
+      @close="editDialogClosed"
+    >
+      <el-form
+        ref="editUserFormRef"
+        :model="editForm"
+        :rules="editFormRules"
+        label-width="80px"
+      >
+        <!-- <el-form-item label="用户名" prop="username">
+          <el-input v-model="addForm.username"></el-input>
+        </el-form-item>
+        <el-form-item label="密码" prop="password">
+          <el-input v-model="addForm.password"></el-input>
+        </el-form-item>
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="addForm.email"></el-input>
+        </el-form-item>
+        <el-form-item label="手机" prop="mobile">
+          <el-input v-model="addForm.mobile"></el-input>
+        </el-form-item> -->
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="editDialogVisible = false">取 消</el-button>
+        <el-button type="primary" @click="addUser">确 定</el-button>
       </span>
     </el-dialog>
   </div>
@@ -120,6 +154,24 @@
 <script>
 export default {
   data() {
+    // 自定义邮箱规则
+    var checkEmail = (rule, value, callback) => {
+      const regEmail = /^\w+@\w+(\.\w+)+$/
+      if (regEmail.test(value)) {
+        // 合法邮箱
+        return callback()
+      }
+      callback(new Error('请输入合法邮箱'))
+    }
+    // 自定义手机号规则
+    var checkMobile = (rule, value, callback) => {
+      const regMobile = /^1[34578]\d{9}$/
+      if (regMobile.test(value)) {
+        return callback()
+      }
+      // 返回一个错误提示
+      callback(new Error('请输入合法的手机号码'))
+    }
     return {
       // 获取用户列表的参数对象
       queryInfo: {
@@ -130,28 +182,53 @@ export default {
       total: 0,
       userList: [],
       addDialogVisible: false,
+      editDialogVisible: false,
       addForm: {
-        username:'',
-        password:'',
-        email:'',
-        mobile:''
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
+      },
+      editForm: {
+        username: '',
+        password: '',
+        email: '',
+        mobile: ''
       },
       addFormRules: {
-        username:[
-          {required:true,message:'请输入用户名',trigger:'blur'},
-          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 12, message: '长度在3到12个字符之间', trigger: 'blur' }
         ],
-        password:[
-          {required:true,message:'请输入密码',trigger:'blur'},
-          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        password: [
+          { required: true, message: '请输入密码', trigger: 'blur' },
+          { min: 3, max: 12, message: '长度在3到12个字符之间', trigger: 'blur' }
         ],
-        email:[
-          {required:true,message:'请输入邮箱',trigger:'blur'},
-          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        email: [
+          { required: true, message: '请输入邮箱', trigger: 'blur' },
+          {
+            min: 4,
+            max: 32,
+            message: '长度在4到32个字符之间',
+            trigger: 'blur'
+          },
+          { validator: checkEmail, trigger: 'blur' }
         ],
-        mobile:[
-          {required:true,message:'请输入手机号',trigger:'blur'},
-          {min: 3, max:12, message:'长度在3到12个字符之间', trigger:'blur'}
+        mobile: [
+          { required: true, message: '请输入手机号', trigger: 'blur' },
+          {
+            min: 3,
+            max: 12,
+            message: '长度在3到12个字符之间',
+            trigger: 'blur'
+          },
+          { validator: checkMobile, trigger: 'blur' }
+        ]
+      },
+      editFormRules: {
+        username: [
+          { required: true, message: '请输入用户名', trigger: 'blur' },
+          { min: 3, max: 12, message: '长度在3到12个字符之间', trigger: 'blur' }
         ],
       }
     }
@@ -160,6 +237,9 @@ export default {
     this.getUserList()
   },
   methods: {
+    showEditDialog (){
+      this.editDialogVisible = true
+    },
     async getUserList() {
       const { data: res } = await this.$http.get('users', {
         params: this.queryInfo
@@ -190,7 +270,30 @@ export default {
         return this.$message.error('用户状态更新失败！')
       }
       return this.$message.success('用户状态更新成功！')
-    }
+    },
+    addDialogClosed() {
+      this.$refs.addUserFormRef.resetFields()
+    },
+    editDialogClosed() {
+      this.$refs.editUserFormRef.resetFields()
+    },
+  
+    addUser () {
+      // 提交请求前，表单预验证
+      this.$refs.addUserFormRef.validate(async valid => {
+        // console.log(valid)
+        // 表单预校验失败
+        if (!valid) return
+        const { data: res } = await this.$http.post('users', this.addForm)
+        if (res.meta.status !== 201) {
+          this.$message.error('添加用户失败！')
+        }
+        this.$message.success('添加用户成功！')
+        // 隐藏添加用户对话框
+        this.addDialogVisible = false
+        this.getUserList()
+      })
+    },
   }
 }
 </script>
